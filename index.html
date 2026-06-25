@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글자수세기 — 글자수·맞춤법 검사 한 곳에서</title>
+  <meta name="description" content="글자수 세기, 단어수, 문장수를 실시간으로 확인하고, 자소서·이력서·보고서에 맞는 맞춤법 검사기를 바로 이용하세요. 완전 무료, 설치 불필요." />
+  <meta name="keywords" content="글자수세기, 글자수 세기, 맞춤법검사기, 띄어쓰기검사, 자소서 글자수, 이력서 맞춤법" />
+  <meta property="og:title" content="글자수세기 — 글자수·맞춤법 검사 한 곳에서" />
+  <meta property="og:description" content="글자수 세기와 맞춤법 검사기를 한 곳에서. 자소서, 이력서, 보고서에 바로 활용하세요." />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://yourdomain.com/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F6F3;
+      --surface: #FFFFFF;
+      --border: #E2E0DA;
+      --text: #1A1917;
+      --muted: #6B6860;
+      --accent: #2563EB;
+      --accent-light: #EFF6FF;
+      --accent-hover: #1D4ED8;
+      --green: #16A34A;
+      --green-light: #F0FDF4;
+      --red: #DC2626;
+      --yellow: #D97706;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Noto Sans KR', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .logo span { color: var(--accent); }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    nav ul a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: color 0.15s;
+    }
+    nav ul a:hover { color: var(--text); }
+
+    /* MAIN */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* COUNTER CARD */
+    .counter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    /* LIMIT PRESETS */
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+    .preset-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-right: 0.25rem;
+    }
+    .preset-btn {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-btn:hover, .preset-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* TEXTAREA */
+    .textarea-wrap {
+      position: relative;
+    }
+    textarea {
+      width: 100%;
+      height: 220px;
+      padding: 1rem;
+      font-family: var(--sans);
+      font-size: 1rem;
+      line-height: 1.7;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      resize: vertical;
+      background: var(--bg);
+      color: var(--text);
+      transition: border-color 0.15s;
+      outline: none;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: #B5B3AD; }
+
+    .textarea-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+    .btn-sm {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm.danger:hover { border-color: var(--red); color: var(--red); }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+    .stat-item {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 1rem 0.75rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+
+    /* LIMIT PROGRESS */
+    .limit-bar-wrap {
+      margin-top: 1.2rem;
+      display: none;
+    }
+    .limit-bar-wrap.visible { display: block; }
+    .limit-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.83rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    .limit-info strong { color: var(--text); }
+    .limit-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .limit-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width 0.2s, background 0.2s;
+    }
+    .limit-bar-fill.warn { background: var(--yellow); }
+    .limit-bar-fill.over { background: var(--red); }
+
+    /* TOGGLE */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .toggle-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .toggle-switch {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px;
+    }
+    .toggle-switch button {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .toggle-switch button.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* SECTION TITLE */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .section-title span {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 0.5rem;
+    }
+
+    /* CHECKER GRID */
+    .checker-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .checker-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .checker-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 16px rgba(37,99,235,0.08);
+    }
+    .checker-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      width: fit-content;
+    }
+    .badge-rec { background: var(--green-light); color: var(--green); }
+    .badge-ai  { background: var(--accent-light); color: var(--accent); }
+    .badge-std { background: #FFF7ED; color: #C2410C; }
+    .checker-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .checker-desc {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+    .checker-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.25rem;
+    }
+    .tag {
+      font-size: 0.72rem;
+      background: var(--bg);
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .checker-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      padding: 8px;
+      border: 1.5px solid var(--accent);
+      border-radius: 7px;
+      margin-top: 0.5rem;
+      transition: all 0.15s;
+    }
+    .checker-link:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* COMPARISON TABLE */
+    .compare-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 3rem;
+    }
+    .compare-wrap table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .compare-wrap th {
+      background: var(--bg);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .compare-wrap td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .compare-wrap tr:last-child td { border-bottom: none; }
+    .compare-wrap tr:hover td { background: var(--bg); }
+    .ck { color: var(--green); font-size: 1rem; }
+    .nx { color: #D1D5DB; font-size: 1rem; }
+
+    /* FAQ */
+    .faq-list { margin-bottom: 3rem; }
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+      overflow: hidden;
+    }
+    .faq-q {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      padding: 1rem 1.25rem;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text);
+    }
+    .faq-q .arrow {
+      font-size: 0.8rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .faq-q.open .arrow { transform: rotate(180deg); }
+    .faq-a {
+      display: none;
+      padding: 0 1.25rem 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .faq-a.open { display: block; }
+
+    /* TIPS */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .tip-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .tip-card h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .tip-card p {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 2rem 1.5rem;
+      margin-top: 2rem;
+    }
+    .footer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-inner p { font-size: 0.82rem; color: var(--muted); }
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-links a {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .footer-links a:hover { color: var(--text); }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .checker-grid { grid-template-columns: 1fr; }
+      .tips-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 1.5rem; }
+      .compare-wrap { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="logo">글자수<span>세기</span>.com</a>
+    <ul>
+      <li><a href="about.html">소개</a></li>
+      <li><a href="contact.html">문의</a></li>
+      <li><a href="privacy.html">개인정보처리방침</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>글자수 세기 · 맞춤법 검사<br><em>한 곳에서 바로</em></h1>
+    <p>자소서, 이력서, 보고서 — 제출 전 마지막 확인을 여기서 끝내세요</p>
+  </div>
+
+  <!-- COUNTER CARD -->
+  <div class="counter-card">
+    <div class="preset-row">
+      <span class="preset-label">글자수 제한:</span>
+      <button class="preset-btn" onclick="setLimit(500)">자소서 500자</button>
+      <button class="preset-btn" onclick="setLimit(1000)">자소서 1,000자</button>
+      <button class="preset-btn" onclick="setLimit(1500)">자소서 1,500자</button>
+      <button class="preset-btn" onclick="setLimit(2000)">보고서 2,000자</button>
+      <button class="preset-btn" onclick="setLimit(300)">SNS 300자</button>
+      <button class="preset-btn" onclick="setLimit(0)">제한 없음</button>
+    </div>
+
+    <div class="textarea-wrap">
+      <textarea id="inputText" placeholder="여기에 글을 붙여넣거나 입력하세요…" oninput="update()"></textarea>
+    </div>
+
+    <div class="textarea-actions">
+      <button class="btn-sm" onclick="copyText()">복사</button>
+      <button class="btn-sm danger" onclick="clearText()">초기화</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" id="charCount">0</div>
+        <div class="stat-label" id="charLabel">글자수 (공백 포함)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="charNoSpace">0</div>
+        <div class="stat-label">글자수 (공백 제외)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="wordCount">0</div>
+        <div class="stat-label">단어수</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="sentCount">0</div>
+        <div class="stat-label">문장수</div>
+      </div>
+    </div>
+
+    <div class="limit-bar-wrap" id="limitBar">
+      <div class="limit-info">
+        <span>글자수 제한 <strong id="limitText">0 / 0</strong></span>
+        <span id="limitRemain"></span>
+      </div>
+      <div class="limit-bar-bg">
+        <div class="limit-bar-fill" id="limitFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <span class="toggle-label">글자수 기준:</span>
+      <div class="toggle-switch">
+        <button id="btnWith" class="active" onclick="setMode('with')">공백 포함</button>
+        <button id="btnWithout" onclick="setMode('without')">공백 제외</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKER SECTION -->
+  <p class="section-title">맞춤법 검사기 바로가기 <span>— 용도별 추천</span></p>
+  <div class="checker-grid">
+    <div class="checker-card">
+      <span class="checker-badge badge-rec">✓ 자소서 추천</span>
+      <div class="checker-name">바른한글 (부산대)</div>
+      <div class="checker-desc">국내 최고 권위의 맞춤법 검사기. 취업준비생의 '등불'로 불리는 부산대 검사기가 바른한글로 새단장했습니다. 자소서·이력서에 가장 신뢰할 수 있는 기준입니다.</div>
+      <div class="checker-tags">
+        <span class="tag">맞춤법</span>
+        <span class="tag">띄어쓰기</span>
+        <span class="tag">문법</span>
+        <span class="tag">국립국어원 기준</span>
+      </div>
+      <a class="checker-link" href="https://nara-speller.co.kr/speller/" target="_blank" rel="noopener">바로가기 →</a>
+    </div>
+
+    <div class="checker-card">
+      <span class="checker-badge badge-ai">AI 기반</span>
+      <div class="checker-name">네이버 맞춤법 검사기</div>
+      <div class="checker-desc">네이버가 자체 개발한 AI 기반 검사기. 긴 문장도 문맥을 파악해 교정하며, 일상적인 글쓰기부터 블로그 포스팅까지 폭넓게 활용됩니다.</div>
+      <div class="checker-tags">
+        <span class="tag">맞춤법</span>
+        <span class="tag">띄어쓰기</span>
+        <span class="tag">블로그·SNS</span>
+      </div>
+      <a class="checker-link" href="https://search.naver.com/search.naver?query=맞춤법+검사기" target="_blank" rel="noopener">바로가기 →</a>
+    </div>
+
+    <div class="checker-card">
+      <span class="checker-badge badge-std">무료 API 제공</span>
+      <div class="checker-name">바른AI 맞춤법 검사기</div>
+      <div class="checker-desc">긴 문서도 문맥을 유지하며 검사하는 AI 기반 서비스. 사용자 사전 등록 기능이 있어 전문용어·고유명사가 많은 보고서·논문에 유용합니다.</div>
+      <div class="checker-tags">
+        <span class="tag">긴 문서</span>
+        <span class="tag">논문·보고서</span>
+        <span class="tag">사용자 사전</span>
+      </div>
+      <a class="checker-link" href="https://bareun.ai/correct" target="_blank" rel="noopener">바로가기 →</a>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <p class="section-title">검사기 비교 <span>— 어떤 걸 써야 할까?</span></p>
+  <div class="compare-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>검사기</th>
+          <th>맞춤법</th>
+          <th>띄어쓰기</th>
+          <th>문맥 분석</th>
+          <th>긴 문서</th>
+          <th>추천 용도</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>바른한글 (부산대)</strong></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="nx">○</span></td>
+          <td>자소서·이력서</td>
+        </tr>
+        <tr>
+          <td><strong>네이버 맞춤법</strong></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="nx">○</span></td>
+          <td>블로그·일상 글쓰기</td>
+        </tr>
+        <tr>
+          <td><strong>바른AI</strong></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td><span class="ck">●</span></td>
+          <td>논문·보고서·긴 문서</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TIPS -->
+  <p class="section-title">맞춤법 검사 활용 팁</p>
+  <div class="tips-grid">
+    <div class="tip-card">
+      <h3>✍️ 자소서는 바른한글을 기준으로</h3>
+      <p>잡코리아, 사람인 등 주요 취업 플랫폼의 내장 맞춤법 검사기는 부산대 엔진(현 바른한글)을 사용합니다. 제출 전 바른한글로 최종 확인하는 것이 가장 안전합니다.</p>
+    </div>
+    <div class="tip-card">
+      <h3>📏 글자수 기준 꼭 확인하세요</h3>
+      <p>회사마다 '공백 포함/제외' 기준이 다릅니다. 채용 공고를 꼼꼼히 확인하고, 위 도구에서 기준을 전환해가며 확인하세요.</p>
+    </div>
+    <div class="tip-card">
+      <h3>🔄 두 번 이상 검사하기</h3>
+      <p>맞춤법 검사기는 교정 후 새로 생긴 오류를 잡지 못하는 경우가 있습니다. 교정 후 한 번 더 검사를 돌려보는 습관을 들이세요.</p>
+    </div>
+    <div class="tip-card">
+      <h3>📝 긴 문서는 나눠서 검사</h3>
+      <p>대부분의 무료 검사기는 한 번에 처리할 수 있는 글자수 제한이 있습니다. 문단 단위로 나눠서 검사하면 더 정확한 결과를 얻을 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <p class="section-title">자주 묻는 질문</p>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        자소서 글자수는 공백 포함인가요, 제외인가요?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">회사마다 기준이 다릅니다. 채용 공고에 명시된 기준을 따르는 것이 원칙입니다. 기준이 명시되지 않았다면 공백 포함으로 작성하고 여유를 두는 것이 안전합니다. 위 도구에서 '공백 포함/제외'를 전환해가며 두 경우 모두 확인해 보세요.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        어떤 맞춤법 검사기가 자소서에 가장 정확한가요?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">잡코리아, 사람인 등 주요 취업 플랫폼은 부산대 맞춤법 검사기 엔진(현 바른한글)을 사용합니다. 자소서·이력서 작성 시에는 바른한글을 기준으로 최종 교정하는 것을 추천합니다. 국립국어원 어문 규범을 기반으로 하며 신뢰도가 가장 높습니다.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        글자수세기 도구 사용 중 입력한 내용이 저장되나요?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">아니요. 이 사이트는 브라우저에서만 동작하는 정적 페이지입니다. 입력한 텍스트는 서버로 전송되거나 저장되지 않으며, 페이지를 새로고침하면 모두 사라집니다. 중요한 내용은 직접 저장해 두세요.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        단어수는 어떻게 계산하나요?
+        <span class="arrow">▼</span>
+      </button>
+      <div class="faq-a">공백(띄어쓰기)으로 구분된 덩어리를 한 단어로 계산합니다. 한국어는 영어와 달리 조사·어미가 붙어 있어 단어 단위 계산이 다소 다를 수 있습니다. 일반적으로 글자수(공백 제외) 기준이 더 많이 활용됩니다.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <p>© 2025 글자수세기. 모든 처리는 브라우저에서만 이루어집니다.</p>
+    <div class="footer-links">
+      <a href="about.html">소개</a>
+      <a href="privacy.html">개인정보처리방침</a>
+      <a href="contact.html">문의</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  let currentLimit = 0;
+  let countMode = 'with'; // 'with' = 공백 포함
+
+  function update() {
+    const text = document.getElementById('inputText').value;
+    const withSpace = text.length;
+    const noSpace = text.replace(/\s/g, '').length;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    const sentences = text.trim() === '' ? 0 : (text.match(/[.!?。]+/g) || []).length || (text.trim().length > 0 ? 1 : 0);
+
+    document.getElementById('charCount').textContent = withSpace.toLocaleString();
+    document.getElementById('charNoSpace').textContent = noSpace.toLocaleString();
+    document.getElementById('wordCount').textContent = words.toLocaleString();
+    document.getElementById('sentCount').textContent = sentences.toLocaleString();
+
+    // limit bar
+    if (currentLimit > 0) {
+      const current = countMode === 'with' ? withSpace : noSpace;
+      const pct = Math.min((current / currentLimit) * 100, 100);
+      const fill = document.getElementById('limitFill');
+      fill.style.width = pct + '%';
+      fill.className = 'limit-bar-fill' + (pct >= 100 ? ' over' : pct >= 80 ? ' warn' : '');
+      document.getElementById('limitText').textContent = `${current.toLocaleString()} / ${currentLimit.toLocaleString()}`;
+      const remain = currentLimit - current;
+      document.getElementById('limitRemain').textContent = remain >= 0 ? `${remain.toLocaleString()}자 남음` : `${Math.abs(remain).toLocaleString()}자 초과 ⚠️`;
+    }
+  }
+
+  function setLimit(n) {
+    currentLimit = n;
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    const bar = document.getElementById('limitBar');
+    bar.classList.toggle('visible', n > 0);
+    update();
+  }
+
+  function setMode(mode) {
+    countMode = mode;
+    document.getElementById('btnWith').classList.toggle('active', mode === 'with');
+    document.getElementById('btnWithout').classList.toggle('active', mode === 'without');
+    update();
+  }
+
+  function copyText() {
+    const text = document.getElementById('inputText').value;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = '복사됨 ✓';
+      setTimeout(() => btn.textContent = '복사', 1500);
+    });
+  }
+
+  function clearText() {
+    document.getElementById('inputText').value = '';
+    update();
+  }
+
+  function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const isOpen = answer.classList.contains('open');
+    document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+    document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+    if (!isOpen) {
+      answer.classList.add('open');
+      btn.classList.add('open');
+    }
+  }
+</script>
+</body>
+</html>
